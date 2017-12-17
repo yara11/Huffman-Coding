@@ -9,7 +9,10 @@ class Node:
         self.right = None
 
     def __lt__(self, other):
-        return self.freq < other.freq
+        if self.freq != other.freq:
+            return self.freq < other.freq
+        return self.char < other.char
+
 
 def calc_frequency(c, frequencies):
     if c in frequencies:
@@ -26,7 +29,9 @@ def read_file(filename):
             if not c:
                 break
             calc_frequency(c, frequencies)
-    print(frequencies)
+
+    # print(frequencies)
+    
     return frequencies
 
 def init_pq(frequencies):
@@ -52,10 +57,29 @@ def Huffman(filename):
         pq.put(z)
     return pq.get()
 
+encode = {}
+decode = {}
+
+def get_codes(filename, node = None, code = ""):
+    if node is None:
+        root = Huffman(filename)
+        return get_codes(filename, root)
+
+    if node.left is None and node.right is None:
+        encode[node.char] = code
+        decode[code] = node.char
+
+    if node.left:
+        get_codes(filename, node.left, code+"0")
+
+    if node.right:
+        get_codes(filename, node.right, code+"1")
+
 
 # read input and count occurences
 print("Please enter filename:")
 name = sys.stdin.readline()
 
-Huffman(name)
-
+get_codes(name)
+print(encode)
+print(decode)
