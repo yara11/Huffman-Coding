@@ -194,9 +194,9 @@ if option[:-1] == "1":
     start=timeit.default_timer()
     compress(name)
     end=timeit.default_timer()
-    print("time: %.2f" % end-start)
+    print(end-start)
 elif option[:-1] == "2":
     start = timeit.default_timer()
     decompress(name)
     end = timeit.default_timer()
-    print("time: %.2f" % end - start)
+    print(end - start)
