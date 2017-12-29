@@ -1,5 +1,6 @@
 # Python libs
 from queue import PriorityQueue
+from zipfile import ZipFile
 import math
 import timeit
 
@@ -209,14 +210,3 @@ def run_and_return_time_elapsed(method, **kwargs):
 	method(kwargs['name'], kwargs['binary'])
 	end = timeit.default_timer()
 	return end - start
-
-# read input and count occurences
-name = input("Please enter filename: ")
-option = input("Do you want to 1.compress or 2.decompress (1/2)? ")
-binary = input ("Is it a binary file (y/n)?") == 'y'
-
-if option == "1":
-	print("Time elapsed: %.2f" % run_and_return_time_elapsed(compress, binary=binary, name=name))
-
-elif option == "2":
-    print("Time elapsed: %.2f" % run_and_return_time_elapsed(decompress, binary=binary, name=name))
