@@ -189,12 +189,20 @@ def calculate_ratio():
 
 
 def compress(filename, binary):
+	global encode
+	global decode
+	encode = {}
+	decode = {}
 	frequencies = read_file(filename, binary)
 	get_codes(frequencies)
 	write_compressed_file(filename, binary)
 	calculate_ratio()
 
 def decompress(filename, binary):
+	global encode
+	global decode
+	encode = {}
+	decode = {}
 	with open(filename,'rb') as f:
 		mode = "wb" if binary else "w"
 		with open("decompressed_" + filename, mode) as f2:
