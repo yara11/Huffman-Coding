@@ -11,9 +11,7 @@ class Node:
         self.right = None
 
     def __lt__(self, other):
-        if self.freq != other.freq:
-            return self.freq < other.freq
-        return self.char < other.char
+        return self.freq < other.freq or (self.freq == other.freq and self.char < other.char)
 
 
 def calc_frequency(c, frequencies):
@@ -25,7 +23,7 @@ def calc_frequency(c, frequencies):
 
 def read_file(filename):
     frequencies = {}
-    with open(filename[:-1]) as f:
+    with open(filename) as f:
         while True:
             c = f.read(1)
             if not c:
@@ -119,10 +117,10 @@ def write_compressed_code(f,f2):
 
 
 def write_compressed_file(filename):
-    newfile = "compressed_" + filename[:-1]
+    newfile = "compressed_" + filename
     with open(newfile, 'wb') as f2:
         write_header(f2)
-        with open(filename[:-1]) as f:
+        with open(filename) as f:
             write_compressed_code(f,f2)
             f.close()
         f2.close()
@@ -178,25 +176,30 @@ def write_decompressed_file(f,f2,code_size):
 
 
 def decompress(filename):
-    with open(filename[:-1],'rb') as f:
-        with open("decompressed_" + filename[11:-1], 'w') as f2:
+    with open(filename,'rb') as f:
+        with open("decompressed_" + filename, 'w') as f2:
             code_size = read_header(f)
             write_decompressed_file(f,f2,code_size)
 
 
-# read input and count occurences
-print("Please enter filename:")
-name = sys.stdin.readline()
-print("Do you want to compress or decompress? '1:compress 2:decompress'")
-option = sys.stdin.readline()
+def run_and_return_time_elapsed(method, filename):
+	start = timeit.default_timer()
+	method(filename)
+	end = timeit.default_timer()
+	return end - start
 
-if option[:-1] == "1":
-    start=timeit.default_timer()
-    compress(name)
-    end=timeit.default_timer()
-    print(end-start)
-elif option[:-1] == "2":
-    start = timeit.default_timer()
-    decompress(name)
-    end = timeit.default_timer()
-    print(end - start)
+# read input and count occurences
+name = input("Please enter filename:")
+option = input("Do you want to 1.compress or 2.decompress (1/2)? ")
+
+if option == "1":
+	binary = input ("Is it a binary file (y/n)?") == 'y'
+
+if option == "1" and binary:
+	print("not implemented")
+
+elif option == "1":
+    print("Time elapsed: %.2f" % run_and_return_time_elapsed(compress, name))
+
+elif option == "2":
+    print("Time elapsed: %.2f" % run_and_return_time_elapsed(decompress, name))
