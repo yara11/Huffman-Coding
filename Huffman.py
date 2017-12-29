@@ -1,18 +1,10 @@
-import sys
+# Python libs
 from queue import PriorityQueue
 import math
 import timeit
 
-class Node:
-    def __init__(self, freq = 0, char = '\0'):
-        self.freq = freq
-        self.char = char
-        self.left = None
-        self.right = None
-
-    def __lt__(self, other):
-        return self.freq < other.freq or (self.freq == other.freq and self.char < other.char)
-
+# Local imports
+from Node import Node
 
 def calc_frequency(c, frequencies):
     if c in frequencies:
@@ -21,9 +13,10 @@ def calc_frequency(c, frequencies):
     frequencies.update({c: 1})
 
 
-def read_file(filename):
+def read_file(filename, binary):
     frequencies = {}
-    with open(filename) as f:
+    mode = "rb" if binary else "r"
+    with open(filename, mode) as f:
         while True:
             c = f.read(1)
             if not c:
@@ -116,25 +109,17 @@ def write_compressed_code(f,f2):
                     str = ""
 
 
-def write_compressed_file(filename):
+def write_compressed_file(filename, binary):
     newfile = "compressed_" + filename
     with open(newfile, 'wb') as f2:
         write_header(f2)
-        with open(filename) as f:
+        mode = "rb" if binary else "r"
+        with open(filename, mode) as f:
             write_compressed_code(f,f2)
             f.close()
         f2.close()
 
 
-def calculate_ratio():
-    print("Compressed ratio: %.2f" % (compressed_length/actual_length))
-
-
-def compress(filename):
-    frequencies = read_file(filename)
-    get_codes(frequencies)
-    write_compressed_file(filename)
-    calculate_ratio()
 
 
 def read_header(f):
@@ -150,6 +135,30 @@ def read_header(f):
         decode[code[-char_size:]] = char
     return code_size
 
+
+def write_decompressed_file_from_binary(f, f2, code_size):
+	temp=""
+	byte=8
+	print(decode)
+	while code_size != 0:
+		c = f.read(1)
+		code_size -= byte
+		if not c:
+		    break
+		s = int.from_bytes(c, 'little')
+		e = format(s, '08b')
+		if code_size < 0:
+		    e = e[:code_size]
+		    byte = byte + 1 + code_size
+		if code_size == 0:
+		    byte += 1
+		for i in range(0, byte):
+		    if temp not in decode.keys():
+		        temp += e[i]
+		    else:
+		        f2.write(decode[temp].encode('utf-8'))
+		        if code_size > 0 or i + 1 != byte:
+		            temp = e[i]
 
 def write_decompressed_file(f,f2,code_size):
     temp=""
@@ -174,32 +183,40 @@ def write_decompressed_file(f,f2,code_size):
                 if code_size > 0 or i + 1 != byte:
                     temp = e[i]
 
-
-def decompress(filename):
-    with open(filename,'rb') as f:
-        with open("decompressed_" + filename, 'w') as f2:
-            code_size = read_header(f)
-            write_decompressed_file(f,f2,code_size)
+def calculate_ratio():
+    print("Compressed ratio: %.2f" % (compressed_length/actual_length))
 
 
-def run_and_return_time_elapsed(method, filename):
+def compress(filename, binary):
+	frequencies = read_file(filename, binary)
+	get_codes(frequencies)
+	write_compressed_file(filename, binary)
+	calculate_ratio()
+
+def decompress(filename, binary):
+	with open(filename,'rb') as f:
+		mode = "wb" if binary else "w"
+		with open("decompressed_" + filename, mode) as f2:
+			code_size = read_header(f)
+			if binary:
+				write_decompressed_file_from_binary(f, f2, code_size)
+			else:
+				write_decompressed_file(f, f2, code_size)
+
+
+def run_and_return_time_elapsed(method, **kwargs):
 	start = timeit.default_timer()
-	method(filename)
+	method(kwargs['name'], kwargs['binary'])
 	end = timeit.default_timer()
 	return end - start
 
 # read input and count occurences
-name = input("Please enter filename:")
+name = input("Please enter filename: ")
 option = input("Do you want to 1.compress or 2.decompress (1/2)? ")
+binary = input ("Is it a binary file (y/n)?") == 'y'
 
 if option == "1":
-	binary = input ("Is it a binary file (y/n)?") == 'y'
-
-if option == "1" and binary:
-	print("not implemented")
-
-elif option == "1":
-    print("Time elapsed: %.2f" % run_and_return_time_elapsed(compress, name))
+	print("Time elapsed: %.2f" % run_and_return_time_elapsed(compress, binary=binary, name=name))
 
 elif option == "2":
-    print("Time elapsed: %.2f" % run_and_return_time_elapsed(decompress, name))
+    print("Time elapsed: %.2f" % run_and_return_time_elapsed(decompress, binary=binary, name=name))
