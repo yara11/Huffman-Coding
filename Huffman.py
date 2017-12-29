@@ -205,7 +205,7 @@ def decompress(filename, binary):
 	decode = {}
 	with open(filename,'rb') as f:
 		mode = "wb" if binary else "w"
-		with open("decompressed_" + filename, mode) as f2:
+		with open("decompressed_" + filename[11:], mode) as f2:
 			code_size = read_header(f)
 			if binary:
 				write_decompressed_file_from_binary(f, f2, code_size)

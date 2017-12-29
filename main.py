@@ -27,7 +27,7 @@ if input("1.Folder or 2.File (1/2)? ") == "1":
   elif option == "2":
     zipf = zipfile.ZipFile(directory+'.zip', 'r', zipfile.ZIP_DEFLATED)
     zipf.extractall()
-    os.makedirs('decompressed_'+directory)
+    os.makedirs('decompressed_'+directory[11:])
     for infile in glob.glob(os.path.join(directory, '*.*')):
       binary = input ("Is %s a binary file (y/n)? " % infile) == 'y'
       print("Time elapsed: %.2f" % run_and_return_time_elapsed(decompress, binary=binary, name=str(infile)))
